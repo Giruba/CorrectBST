@@ -7,6 +7,10 @@ namespace CorrectBST
     static class TreeUtility
     {
         static BinaryTreeNode previousNode = null;
+        static int BSTNodes = 0;
+        static int[] BSTNodesArray;
+        static BinaryTreeNode newTree = null;
+
         public static void CorrectBST(BinaryTreeNode binaryTreeNode){
             ResultNodes resultNodes = new ResultNodes();
             resultNodes = _CorrectBSTUtil(binaryTreeNode, resultNodes);
@@ -17,7 +21,8 @@ namespace CorrectBST
             else {
                 if (resultNodes.GetThirdNode() != null)
                 {
-                    binaryTreeNode = SwapAndRectify(binaryTreeNode, resultNodes.GetFirstNode(), resultNodes.GetThirdNode());
+                    binaryTreeNode = RectifyTree(binaryTreeNode, resultNodes.GetFirstNode().GetData(),
+                        resultNodes.GetThirdNode().GetData());
                     
                 }
                 else {
@@ -36,8 +41,6 @@ namespace CorrectBST
             int value2 = node2.GetData();
 
             rootNode = Rectify(rootNode, value1, value2);
-            //previousNode = null;
-            //return Rectify(rootNode, value2, value1);
             return rootNode;
         }
 
@@ -67,7 +70,7 @@ namespace CorrectBST
             {
                 resultNodes.SetPreviousNode(binaryTreeNode);
             }
-
+            BSTNodes++;
             return _CorrectBSTUtil(binaryTreeNode.GetRightNode(), resultNodes);
         }
 
@@ -149,5 +152,79 @@ namespace CorrectBST
             }
             return binaryTree;
         }
+
+        private static BinaryTreeNode RectifyTree(BinaryTreeNode binaryTreeNode, int value1, int value2) {
+
+            if (binaryTreeNode == null) {
+                return null;
+            }
+            int count = 0;
+            BSTNodesArray = GetArrayFromTree(binaryTreeNode, count);
+            Swap(value1, value2);
+
+            return _ConstructedTree(0, BSTNodes);
+        }
+
+
+        private static BinaryTreeNode _ConstructedTree(int start, int end) {
+            if (start < end) {
+                return null;
+            }
+
+            int mid = (end - start) / 2;
+
+            BinaryTreeNode left = _ConstructedTree(start, mid-1);
+            BinaryTreeNode root = new BinaryTreeNode();
+            root.SetData(BSTNodesArray[mid]);
+            BinaryTreeNode right = _ConstructedTree(mid+1, end);
+            root.SetLeftNode(left);
+            root.SetRightNode(right);
+            return root;
+        }
+
+        private static int[] GetArrayFromTree(BinaryTreeNode binaryTreeNode, int count) {
+            BSTNodesArray = new int[BSTNodes];
+            if (binaryTreeNode != null) {
+                GetArrayFromTree(binaryTreeNode.GetLeftNode(), count);
+                BSTNodesArray[count++] = binaryTreeNode.GetData();
+                GetArrayFromTree(binaryTreeNode.GetRightNode(), count);
+            }
+            return BSTNodesArray;
+        }
+
+        private static void Swap(int value1, int value2) {
+            for (int i = 0; i < BSTNodes; i++) {
+                if (BSTNodesArray[i] == value1) {
+                    BSTNodesArray[i] = value2;
+                    ReplaceValue(i, value2, value1);
+                    break;
+                }
+            }
+        }
+
+
+        private static void ReplaceValue(int index, int value1, int value2) {
+            bool flag = false;
+            for (int i = 0; i < index; i++) {
+                if (BSTNodesArray[i] == value1) {
+                    BSTNodesArray[i] = value2;
+                    flag = true;
+                    break;
+                }
+            }
+
+            if (flag != false)
+            {
+                for (int i = index; i < BSTNodes; i++)
+                {
+                    if (BSTNodesArray[i] == value1)
+                    {
+                        BSTNodesArray[i] = value2;
+                        break;
+                    }
+                }
+            }
+        }
+
     }
 }
